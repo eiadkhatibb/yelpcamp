@@ -1,3 +1,14 @@
+// if (process.env.NODE_ENV !== "production") {
+//   import("dotenv").config();
+// }
+
+import dotenv from "dotenv";
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
+// import dotenv from "dotenv";
+// dotenv.config();
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -72,10 +83,22 @@ app.get("/", (req, res) => {
 app.all("*", (req, res, next) => {
   next(new ExpressErrors("page not found"), 404);
 });
+// app.use((err, req, res, next) => {
+//   const { statusCode = 500 } = err;
+//   if (!err.message) err.message = "something went wrong";
+//   res.status(statusCode).render("error", { err });
+//   // res.send(message);
+// });
+
 app.use((err, req, res, next) => {
   const { statusCode = 500 } = err;
-  if (!err.message) err.message = "something went wrong";
-  res.status(statusCode).render("error", { err });
+
+  // If err is a string, convert it to an object with a message property
+  const errorObject = typeof err === "string" ? { message: err } : err;
+
+  if (!errorObject.message) errorObject.message = "Something went wrong";
+
+  res.status(statusCode).render("error", { err: errorObject });
   // res.send(message);
 });
 app.listen(3000, () => {
