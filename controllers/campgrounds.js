@@ -1,5 +1,9 @@
 import Campground from "../models/campground.js";
 import { cloudinary } from "../cloudinary/index.js";
+// import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding";
+import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding.js";
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 
 export const campgrounds = {
   index: async (req, res) => {
@@ -11,12 +15,20 @@ export const campgrounds = {
   },
 
   createCampground: async (req, res, next) => {
+    const geoData = await geocoder
+      .forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1,
+      })
+      .send();
     // if (!req.body.campground) throw new ExpressErrors("Invalid camp data", 400);
     const campground = new Campground(req.body.campground);
+    campground.geometry = geoData.body.features[0].geometry;
     campground.images = req.files.map((f) => ({
       url: f.path,
       filename: f.filename,
     }));
+
     campground.author = req.user._id;
     await campground.save();
     console.log(campground);
@@ -79,7 +91,14 @@ export const campgrounds = {
 
   deleteCampground: async (req, res) => {
     const { id } = req.params;
-    const campground = await Campground.findByIdAndDelete(id);
+    const campground = await Campground.findById(id);
+    if (campground.images.length > 0) {
+      // Loop through the images and delete them from Cloudinary
+      for (const image of campground.images) {
+        await cloudinary.uploader.destroy(image.filename);
+      }
+    }
+    await Campground.findByIdAndDelete(id);
     req.flash("success", "Successfully deleted campground");
     res.redirect("/campgrounds");
   },
