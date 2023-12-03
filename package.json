@@ -13,6 +13,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.15.3",
     "cloudinary": "^1.41.0",
     "connect-flash": "^0.1.1",
     "dotenv": "^16.3.1",
@@ -37,5 +38,8 @@
   "bugs": {
     "url": "https://github.com/eiadkhatibb/yelpcamp/issues"
   },
-  "homepage": "https://github.com/eiadkhatibb/yelpcamp#readme"
+  "homepage": "https://github.com/eiadkhatibb/yelpcamp#readme",
+  "devDependencies": {
+    "@types/mapbox__mapbox-sdk": "^0.13.10"
+  }
 }
