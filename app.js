@@ -9,6 +9,7 @@ if (process.env.NODE_ENV !== "production") {
 
 // import dotenv from "dotenv";
 // dotenv.config();
+
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -25,6 +26,8 @@ import flash from "connect-flash";
 import passport from "passport";
 import LocalStrategy from "passport-local";
 import User from "./models/user.js";
+import mongoSanitize from "express-mongo-sanitize";
+import helmet from "helmet";
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -41,16 +44,70 @@ app.set("view engine", "ejs");
 app.use(methodOverride("_method"));
 app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "public")));
+app.use(
+  helmet({
+    contentSecurityPolicy: false,
+  })
+);
+
+const scriptSrcUrls = [
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://api.mapbox.com/",
+  "https://kit.fontawesome.com/",
+  "https://cdnjs.cloudflare.com/",
+  "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+  "https://kit-free.fontawesome.com/",
+  "https://stackpath.bootstrapcdn.com/",
+  "https://api.mapbox.com/",
+  "https://api.tiles.mapbox.com/",
+  "https://fonts.googleapis.com/",
+  "https://use.fontawesome.com/",
+];
+const connectSrcUrls = [
+  "https://api.mapbox.com/",
+  "https://a.tiles.mapbox.com/",
+  "https://b.tiles.mapbox.com/",
+  "https://events.mapbox.com/",
+];
+const fontSrcUrls = [];
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: [],
+      connectSrc: ["'self'", ...connectSrcUrls],
+      scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+      styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+      workerSrc: ["'self'", "blob:"],
+      objectSrc: [],
+      imgSrc: [
+        "'self'",
+        "blob:",
+        "data:",
+        "https://res.cloudinary.com/douqbebwk/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT!
+        "https://res.cloudinary.com/dkwle5z5s/",
+        "https://images.unsplash.com/",
+      ],
+      fontSrc: ["'self'", ...fontSrcUrls],
+    },
+  })
+);
+
 const sessionConfig = {
+  name: "camp",
   secret: "thisshouldbeabettersecret",
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
+    // secure: true,
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxage: 1000 * 60 * 60 * 24 * 7,
   },
 };
+app.use(mongoSanitize());
 app.use(session(sessionConfig));
 app.use(flash());
 app.use(passport.initialize());
@@ -60,6 +117,7 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
+  // console.log(req.query);
   res.locals.currentUser = req.user;
   res.locals.username = req.user;
   res.locals.success = req.flash("success");
