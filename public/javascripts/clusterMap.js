@@ -6,7 +6,21 @@ const map = new mapboxgl.Map({
   zoom: 3,
 });
 
-map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new mapboxgl.NavigationControl(), "bottom-left");
+
+// const geocoder = new MapboxGeocoder({
+//   accessToken: mapToken,
+//   mapboxgl: mapboxgl,
+// });
+
+// document.getElementById("geocoder").appendChild(geocoder.onAdd(map));
+
+map.addControl(
+  new MapboxGeocoder({
+    accessToken: mapToken,
+    mapboxgl: mapboxgl,
+  })
+);
 
 map.on("load", function () {
   // Add a new source from our GeoJSON data and
