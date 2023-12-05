@@ -3,6 +3,9 @@ import Review from "../models/review.js";
 import { campgroundSchema } from "../schemas.js";
 import { ReviewSchema } from "../schemas.js";
 import ExpressErrors from "../utils/ExpressErrors.js";
+import mbxGeocoding from "@mapbox/mapbox-sdk/services/geocoding.js";
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geocodingClient = mbxGeocoding({ accessToken: mapBoxToken });
 
 export const validateReview = (req, res, next) => {
   const { error } = ReviewSchema.validate(req.body);
@@ -57,4 +60,36 @@ export const isReviewAuthor = async (req, res, next) => {
   }
   next();
 };
-// export default isLoggedIn;
+
+export const isValidLocation = async (req, res, next) => {
+  try {
+    const addr = req.body.campground.location;
+
+    // Geocode the address
+    const response = await geocodingClient
+      .forwardGeocode({
+        query: addr,
+        limit: 1,
+      })
+      .send();
+
+    const features = response.body.features;
+
+    if (features.length > 0) {
+      // The syntax of the input location is correct
+      req.validatedLocation = features[0].place_name;
+      next();
+    } else {
+      // Invalid address or other geocoding error
+      const errorObject = {
+        message: "please ender a valid address  ex:(Beirut, lebanon)",
+      };
+
+      res.status(400).render("error", { err: errorObject });
+    }
+  } catch (error) {
+    // Handle other errors
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};

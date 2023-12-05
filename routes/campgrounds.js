@@ -3,7 +3,12 @@ const router = express.Router();
 import CatchAsync from "../utils/catchAsync.js";
 import Campground from "../models/campground.js";
 import { campgrounds } from "../controllers/campgrounds.js";
-import { isLoggedIn, validateCampground, isAuthor } from "./middleware.js";
+import {
+  isLoggedIn,
+  validateCampground,
+  isAuthor,
+  isValidLocation,
+} from "./middleware.js";
 import { storage } from "../cloudinary/index.js";
 import multer from "multer";
 const upload = multer({ storage });
@@ -14,6 +19,7 @@ router
     isLoggedIn,
     upload.array("image"),
     validateCampground,
+    isValidLocation,
     CatchAsync(campgrounds.createCampground)
   );
 
@@ -26,6 +32,7 @@ router
     upload.array("image"),
     validateCampground,
     isAuthor,
+    isValidLocation,
     CatchAsync(campgrounds.updateCampground)
   )
   .delete(isLoggedIn, isAuthor, CatchAsync(campgrounds.deleteCampground));

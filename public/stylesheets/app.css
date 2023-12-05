@@ -1,7 +1,17 @@
 #cluster-map {
 width: 100%;
-height: 500px;}
+height: 400px;}
 
 #map {
 width: 100%;
 height: 300px;}
+
+
+.geocoder {
+  position: absolute;
+  width: 40%;
+  left: 60%;
+  transform: translateX(-50%); /* Center the element horizontally */
+  top: 10px;
+  z-index: 1; /* Ensure the geocoder is above the map */
+}
