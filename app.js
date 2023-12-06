@@ -38,6 +38,9 @@ const __dirname = dirname(__filename);
 // const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
 const CONNECTION_URL =
   process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
+
+// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
+
 mongoose
   .connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("running"))
