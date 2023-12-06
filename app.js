@@ -28,12 +28,16 @@ import LocalStrategy from "passport-local";
 import User from "./models/user.js";
 import mongoSanitize from "express-mongo-sanitize";
 import helmet from "helmet";
+import MongoStore from "connect-mongo";
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";
+
+// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
+const CONNECTION_URL =
+  process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
 mongoose
   .connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("running"))
@@ -86,23 +90,36 @@ app.use(
         "'self'",
         "blob:",
         "data:",
-        "https://res.cloudinary.com/douqbebwk/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT!
-        "https://res.cloudinary.com/dkwle5z5s/",
+        "https://res.cloudinary.com/douqbebwk/",
         "https://images.unsplash.com/",
       ],
       fontSrc: ["'self'", ...fontSrcUrls],
     },
   })
 );
+const secret = process.env.SECRET || "thisshouldbeabettersecret";
+
+const store = MongoStore.create({
+  mongoUrl: CONNECTION_URL,
+  touchAfter: 24 * 60 * 60,
+  crypto: {
+    secret,
+  },
+});
+
+store.on("error", (e) => {
+  console.log("session store error", e);
+});
 
 const sessionConfig = {
+  store,
   name: "camp",
-  secret: "thisshouldbeabettersecret",
+  secret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    // secure: true,
+    secure: true, //remove this when not on production
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxage: 1000 * 60 * 60 * 24 * 7,
   },
@@ -159,6 +176,7 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error", { err: errorObject });
   // res.send(message);
 });
-app.listen(3000, () => {
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
   console.log("connected at post 3000");
 });
