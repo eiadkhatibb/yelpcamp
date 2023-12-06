@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";
+// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
 const CONNECTION_URL = process.env.DB_URL;
 mongoose
   .connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -117,7 +117,7 @@ const sessionConfig = {
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    secure: true,
+    secure: true, //remove this when not on production
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxage: 1000 * 60 * 60 * 24 * 7,
   },
