@@ -120,8 +120,8 @@ const sessionConfig = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    // httpOnly: true,
-    // secure: true, //remove this when not on production
+    httpOnly: true,
+    secure: true, //remove this when not on production
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxage: 1000 * 60 * 60 * 24 * 7,
   },
