@@ -2,13 +2,13 @@
 //   import("dotenv").config();
 // }
 
-// import dotenv from "dotenv";
-// if (process.env.NODE_ENV !== "production") {
-//   dotenv.config();
-// }
-
 import dotenv from "dotenv";
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
+
+// import dotenv from "dotenv";
+// dotenv.config();
 
 import express from "express";
 import path from "path";
@@ -35,11 +35,9 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
+// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";
 const CONNECTION_URL =
   process.env.DB_URL || "mongodb://localhost:27017/yelp-camp";
-
-// const CONNECTION_URL = "mongodb://localhost:27017/yelp-camp";    //use local host when not on production
 
 mongoose
   .connect(CONNECTION_URL, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -94,6 +92,7 @@ app.use(
         "blob:",
         "data:",
         "https://res.cloudinary.com/douqbebwk/",
+        "https://res.cloudinary.com/dkwle5z5s/",
         "https://images.unsplash.com/",
       ],
       fontSrc: ["'self'", ...fontSrcUrls],
@@ -121,8 +120,8 @@ const sessionConfig = {
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
-    secure: true, //remove this when not on production
+    // httpOnly: true,
+    // secure: true, //remove this when not on production
     expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
     maxage: 1000 * 60 * 60 * 24 * 7,
   },
@@ -149,11 +148,11 @@ app.use("/campgrounds", campgroundsRoutes);
 app.use("/campgrounds/:id/reviews", reviewsRoutes);
 app.use("/", userRoutes);
 
-app.get("/fakeuser", async (req, res) => {
-  const user = new User({ email: "eiad@gmail.com", username: "eiad" });
-  const newUser = await User.register(user, "chicken");
-  res.send(newUser);
-});
+// app.get("/fakeuser", async (req, res) => {
+//   const user = new User({ email: "eiad@gmail.com", username: "eiad" });
+//   const newUser = await User.register(user, "chicken");
+//   res.send(newUser);
+// });
 app.get("/", (req, res) => {
   res.render("home");
 });
