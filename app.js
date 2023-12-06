@@ -2,13 +2,13 @@
 //   import("dotenv").config();
 // }
 
-import dotenv from "dotenv";
-if (process.env.NODE_ENV !== "production") {
-  dotenv.config();
-}
-
 // import dotenv from "dotenv";
-// dotenv.config();
+// if (process.env.NODE_ENV !== "production") {
+//   dotenv.config();
+// }
+
+import dotenv from "dotenv";
+dotenv.config();
 
 import express from "express";
 import path from "path";
@@ -181,5 +181,5 @@ app.use((err, req, res, next) => {
 });
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log("connected at post 3000");
+  console.log(`connected at port ${port}`);
 });
